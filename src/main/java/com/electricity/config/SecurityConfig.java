@@ -34,7 +34,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
+            .csrf()
+                .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .and()
             .authorizeRequests()
                 .antMatchers("/static/**", "/webjars/**").permitAll()
                 .antMatchers("/users/**").hasRole("ADMIN")
