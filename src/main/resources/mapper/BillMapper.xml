@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.electricity.dao.BillDao">
+
+    <resultMap id="BillResultMap" type="Bill">
+        <id property="id" column="id"/>
+        <result property="clientId" column="client_id"/>
+        <result property="clientName" column="client_name"/>
+        <result property="meterReadingId" column="meter_reading_id"/>
+        <result property="billingMonth" column="billing_month"/>
+        <result property="billingYear" column="billing_year"/>
+        <result property="consumption" column="consumption"/>
+        <result property="pricePerKwh" column="price_per_kwh"/>
+        <result property="pricePerAmpere" column="price_per_ampere"/>
+        <result property="subscriptionFeePerAmpere" column="subscription_fee_per_ampere"/>
+        <result property="ampereCapacity" column="ampere_capacity"/>
+        <result property="consumptionChargeUsd" column="consumption_charge_usd"/>
+        <result property="subscriptionFeeUsd" column="subscription_fee_usd"/>
+        <result property="totalAmountUsd" column="total_amount_usd"/>
+        <result property="totalAmountLbp" column="total_amount_lbp"/>
+        <result property="exchangeRate" column="exchange_rate"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="BillResultMap">
+        SELECT b.*, c.name AS client_name
+        FROM bills b
+        JOIN clients c ON b.client_id = c.id
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="BillResultMap">
+        SELECT b.*, c.name AS client_name
+        FROM bills b
+        JOIN clients c ON b.client_id = c.id
+        ORDER BY b.billing_year DESC, b.billing_month DESC, c.name
+    </select>
+
+    <select id="findByClientId" resultMap="BillResultMap">
+        SELECT b.*, c.name AS client_name
+        FROM bills b
+        JOIN clients c ON b.client_id = c.id
+        WHERE b.client_id = #{clientId}
+        ORDER BY b.billing_year DESC, b.billing_month DESC
+    </select>
+
+    <select id="findByMonthAndYear" resultMap="BillResultMap">
+        SELECT b.*, c.name AS client_name
+        FROM bills b
+        JOIN clients c ON b.client_id = c.id
+        WHERE b.billing_month = #{billingMonth} AND b.billing_year = #{billingYear}
+        ORDER BY c.name
+    </select>
+
+    <select id="findByClientAndPeriod" resultMap="BillResultMap">
+        SELECT b.*, c.name AS client_name
+        FROM bills b
+        JOIN clients c ON b.client_id = c.id
+        WHERE b.client_id = #{clientId}
+          AND b.billing_month = #{billingMonth}
+          AND b.billing_year = #{billingYear}
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="Bill" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bills (client_id, meter_reading_id, billing_month, billing_year,
+                           consumption, price_per_kwh, price_per_ampere, subscription_fee_per_ampere,
+                           ampere_capacity, consumption_charge_usd, subscription_fee_usd,
+                           total_amount_usd, total_amount_lbp, exchange_rate, status, created_at, updated_at)
+        VALUES (#{clientId}, #{meterReadingId}, #{billingMonth}, #{billingYear},
+                #{consumption}, #{pricePerKwh}, #{pricePerAmpere}, #{subscriptionFeePerAmpere},
+                #{ampereCapacity}, #{consumptionChargeUsd}, #{subscriptionFeeUsd},
+                #{totalAmountUsd}, #{totalAmountLbp}, #{exchangeRate}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="Bill">
+        UPDATE bills SET
+            client_id = #{clientId},
+            meter_reading_id = #{meterReadingId},
+            billing_month = #{billingMonth},
+            billing_year = #{billingYear},
+            consumption = #{consumption},
+            price_per_kwh = #{pricePerKwh},
+            price_per_ampere = #{pricePerAmpere},
+            subscription_fee_per_ampere = #{subscriptionFeePerAmpere},
+            ampere_capacity = #{ampereCapacity},
+            consumption_charge_usd = #{consumptionChargeUsd},
+            subscription_fee_usd = #{subscriptionFeeUsd},
+            total_amount_usd = #{totalAmountUsd},
+            total_amount_lbp = #{totalAmountLbp},
+            exchange_rate = #{exchangeRate},
+            status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM bills WHERE id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE bills SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+</mapper>

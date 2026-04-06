@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.electricity.dao.MeterReadingDao">
+
+    <resultMap id="MeterReadingResultMap" type="MeterReading">
+        <id property="id" column="id"/>
+        <result property="clientId" column="client_id"/>
+        <result property="clientName" column="client_name"/>
+        <result property="readingDate" column="reading_date"/>
+        <result property="startReading" column="start_reading"/>
+        <result property="endReading" column="end_reading"/>
+        <result property="consumption" column="consumption"/>
+        <result property="billingMonth" column="billing_month"/>
+        <result property="billingYear" column="billing_year"/>
+        <result property="notes" column="notes"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="MeterReadingResultMap">
+        SELECT mr.*, c.name AS client_name
+        FROM meter_readings mr
+        JOIN clients c ON mr.client_id = c.id
+        WHERE mr.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="MeterReadingResultMap">
+        SELECT mr.*, c.name AS client_name
+        FROM meter_readings mr
+        JOIN clients c ON mr.client_id = c.id
+        ORDER BY mr.billing_year DESC, mr.billing_month DESC, c.name
+    </select>
+
+    <select id="findByClientId" resultMap="MeterReadingResultMap">
+        SELECT mr.*, c.name AS client_name
+        FROM meter_readings mr
+        JOIN clients c ON mr.client_id = c.id
+        WHERE mr.client_id = #{clientId}
+        ORDER BY mr.billing_year DESC, mr.billing_month DESC
+    </select>
+
+    <select id="findByMonthAndYear" resultMap="MeterReadingResultMap">
+        SELECT mr.*, c.name AS client_name
+        FROM meter_readings mr
+        JOIN clients c ON mr.client_id = c.id
+        WHERE mr.billing_month = #{billingMonth} AND mr.billing_year = #{billingYear}
+        ORDER BY c.name
+    </select>
+
+    <select id="findByClientAndPeriod" resultMap="MeterReadingResultMap">
+        SELECT mr.*, c.name AS client_name
+        FROM meter_readings mr
+        JOIN clients c ON mr.client_id = c.id
+        WHERE mr.client_id = #{clientId}
+          AND mr.billing_month = #{billingMonth}
+          AND mr.billing_year = #{billingYear}
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="MeterReading" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO meter_readings (client_id, reading_date, start_reading, end_reading, billing_month, billing_year, notes, created_at, updated_at)
+        VALUES (#{clientId}, #{readingDate}, #{startReading}, #{endReading},
+                #{billingMonth}, #{billingYear}, #{notes}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="MeterReading">
+        UPDATE meter_readings SET
+            client_id = #{clientId},
+            reading_date = #{readingDate},
+            start_reading = #{startReading},
+            end_reading = #{endReading},
+            billing_month = #{billingMonth},
+            billing_year = #{billingYear},
+            notes = #{notes},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM meter_readings WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.electricity.dao.InvoiceDao">
+
+    <resultMap id="InvoiceResultMap" type="Invoice">
+        <id property="id" column="id"/>
+        <result property="invoiceNumber" column="invoice_number"/>
+        <result property="billId" column="bill_id"/>
+        <result property="clientId" column="client_id"/>
+        <result property="clientName" column="client_name"/>
+        <result property="billingMonth" column="billing_month"/>
+        <result property="billingYear" column="billing_year"/>
+        <result property="issueDate" column="issue_date"/>
+        <result property="dueDate" column="due_date"/>
+        <result property="totalAmountUsd" column="total_amount_usd"/>
+        <result property="totalAmountLbp" column="total_amount_lbp"/>
+        <result property="exchangeRate" column="exchange_rate"/>
+        <result property="status" column="status"/>
+        <result property="notes" column="notes"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="InvoiceResultMap">
+        SELECT i.*, c.name AS client_name
+        FROM invoices i
+        JOIN clients c ON i.client_id = c.id
+        WHERE i.id = #{id}
+    </select>
+
+    <select id="findByInvoiceNumber" parameterType="string" resultMap="InvoiceResultMap">
+        SELECT i.*, c.name AS client_name
+        FROM invoices i
+        JOIN clients c ON i.client_id = c.id
+        WHERE i.invoice_number = #{invoiceNumber}
+    </select>
+
+    <select id="findAll" resultMap="InvoiceResultMap">
+        SELECT i.*, c.name AS client_name
+        FROM invoices i
+        JOIN clients c ON i.client_id = c.id
+        ORDER BY i.billing_year DESC, i.billing_month DESC, c.name
+    </select>
+
+    <select id="findByClientId" resultMap="InvoiceResultMap">
+        SELECT i.*, c.name AS client_name
+        FROM invoices i
+        JOIN clients c ON i.client_id = c.id
+        WHERE i.client_id = #{clientId}
+        ORDER BY i.billing_year DESC, i.billing_month DESC
+    </select>
+
+    <select id="findByMonthAndYear" resultMap="InvoiceResultMap">
+        SELECT i.*, c.name AS client_name
+        FROM invoices i
+        JOIN clients c ON i.client_id = c.id
+        WHERE i.billing_month = #{billingMonth} AND i.billing_year = #{billingYear}
+        ORDER BY c.name
+    </select>
+
+    <insert id="insert" parameterType="Invoice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO invoices (invoice_number, bill_id, client_id, billing_month, billing_year,
+                              issue_date, due_date, total_amount_usd, total_amount_lbp,
+                              exchange_rate, status, notes, created_at, updated_at)
+        VALUES (#{invoiceNumber}, #{billId}, #{clientId}, #{billingMonth}, #{billingYear},
+                #{issueDate}, #{dueDate}, #{totalAmountUsd}, #{totalAmountLbp},
+                #{exchangeRate}, #{status}, #{notes}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="Invoice">
+        UPDATE invoices SET
+            invoice_number = #{invoiceNumber},
+            bill_id = #{billId},
+            client_id = #{clientId},
+            billing_month = #{billingMonth},
+            billing_year = #{billingYear},
+            issue_date = #{issueDate},
+            due_date = #{dueDate},
+            total_amount_usd = #{totalAmountUsd},
+            total_amount_lbp = #{totalAmountLbp},
+            exchange_rate = #{exchangeRate},
+            status = #{status},
+            notes = #{notes},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM invoices WHERE id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE invoices SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM invoices
+    </select>
+
+</mapper>

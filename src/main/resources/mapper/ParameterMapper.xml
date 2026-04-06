@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.electricity.dao.ParameterDao">
+
+    <resultMap id="ParameterResultMap" type="Parameter">
+        <id property="id" column="id"/>
+        <result property="paramKey" column="param_key"/>
+        <result property="paramValue" column="param_value"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="ParameterResultMap">
+        SELECT * FROM parameters WHERE id = #{id}
+    </select>
+
+    <select id="findByKey" resultMap="ParameterResultMap">
+        SELECT * FROM parameters WHERE param_key = #{paramKey}
+    </select>
+
+    <select id="findAll" resultMap="ParameterResultMap">
+        SELECT * FROM parameters ORDER BY param_key
+    </select>
+
+    <insert id="insert" parameterType="Parameter" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO parameters (param_key, param_value, description, created_at, updated_at)
+        VALUES (#{paramKey}, #{paramValue}, #{description}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="Parameter">
+        UPDATE parameters SET
+            param_key = #{paramKey},
+            param_value = #{paramValue},
+            description = #{description},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <insert id="upsert" parameterType="Parameter">
+        INSERT INTO parameters (param_key, param_value, description, created_at, updated_at)
+        VALUES (#{paramKey}, #{paramValue}, #{description}, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE
+            param_value = #{paramValue},
+            description = #{description},
+            updated_at = NOW()
+    </insert>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM parameters WHERE id = #{id}
+    </delete>
+
+</mapper>
