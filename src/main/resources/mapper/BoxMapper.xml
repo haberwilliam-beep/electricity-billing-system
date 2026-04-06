@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.electricity.mapper.BoxMapper">
+
+    <resultMap id="boxResultMap" type="Box">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="zoneId" column="zone_id"/>
+        <result property="description" column="description"/>
+        <result property="active" column="active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="zoneName" column="zone_name"/>
+    </resultMap>
+
+    <sql id="selectBase">
+        SELECT b.*, z.name AS zone_name
+        FROM boxes b
+        LEFT JOIN zones z ON b.zone_id = z.id
+    </sql>
+
+    <select id="findById" resultMap="boxResultMap">
+        <include refid="selectBase"/>
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="boxResultMap">
+        <include refid="selectBase"/>
+        ORDER BY z.name, b.name
+    </select>
+
+    <select id="findByZoneId" resultMap="boxResultMap">
+        <include refid="selectBase"/>
+        WHERE b.zone_id = #{zoneId}
+        ORDER BY b.name
+    </select>
+
+    <select id="findAllActive" resultMap="boxResultMap">
+        <include refid="selectBase"/>
+        WHERE b.active = 1
+        ORDER BY z.name, b.name
+    </select>
+
+    <select id="findAllPaged" resultMap="boxResultMap">
+        <include refid="selectBase"/>
+        <where>
+            <if test="search != null and search != ''">
+                AND (b.name LIKE CONCAT('%',#{search},'%')
+                  OR z.name LIKE CONCAT('%',#{search},'%'))
+            </if>
+            <if test="zoneId != null">
+                AND b.zone_id = #{zoneId}
+            </if>
+        </where>
+        ORDER BY z.name, b.name
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM boxes b
+        LEFT JOIN zones z ON b.zone_id = z.id
+        <where>
+            <if test="search != null and search != ''">
+                AND (b.name LIKE CONCAT('%',#{search},'%')
+                  OR z.name LIKE CONCAT('%',#{search},'%'))
+            </if>
+            <if test="zoneId != null">
+                AND b.zone_id = #{zoneId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO boxes (name, zone_id, description, active)
+        VALUES (#{name}, #{zoneId}, #{description}, #{active})
+    </insert>
+
+    <update id="update">
+        UPDATE boxes SET name=#{name}, zone_id=#{zoneId}, description=#{description}, active=#{active}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM boxes WHERE id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.electricity.mapper.ParameterMapper">
+
+    <resultMap id="paramResultMap" type="Parameter">
+        <id property="id" column="id"/>
+        <result property="paramKey" column="param_key"/>
+        <result property="paramValue" column="param_value"/>
+        <result property="description" column="description"/>
+        <result property="updatedBy" column="updated_by"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="updatedByUsername" column="updated_by_username"/>
+    </resultMap>
+
+    <sql id="selectBase">
+        SELECT p.*, u.username AS updated_by_username
+        FROM parameters p
+        LEFT JOIN users u ON p.updated_by = u.id
+    </sql>
+
+    <select id="findByKey" resultMap="paramResultMap">
+        <include refid="selectBase"/>
+        WHERE p.param_key = #{paramKey}
+    </select>
+
+    <select id="findAll" resultMap="paramResultMap">
+        <include refid="selectBase"/>
+        ORDER BY p.param_key
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO parameters (param_key, param_value, description, updated_by)
+        VALUES (#{paramKey}, #{paramValue}, #{description}, #{updatedBy})
+    </insert>
+
+    <update id="update">
+        UPDATE parameters SET
+            param_value = #{paramValue},
+            description = #{description},
+            updated_by = #{updatedBy}
+        WHERE param_key = #{paramKey}
+    </update>
+
+    <insert id="upsert">
+        INSERT INTO parameters (param_key, param_value, description, updated_by)
+        VALUES (#{paramKey}, #{paramValue}, #{description}, #{updatedBy})
+        ON DUPLICATE KEY UPDATE
+            param_value = VALUES(param_value),
+            description = VALUES(description),
+            updated_by  = VALUES(updated_by)
+    </insert>
+</mapper>

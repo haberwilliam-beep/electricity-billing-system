@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.electricity.mapper.CustomerMapper">
+
+    <resultMap id="customerResultMap" type="Customer">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+        <result property="boxId" column="box_id"/>
+        <result property="billingType" column="billing_type"/>
+        <result property="amperCapacity" column="amper_capacity"/>
+        <result property="meterNumber" column="meter_number"/>
+        <result property="active" column="active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="boxName" column="box_name"/>
+        <result property="zoneName" column="zone_name"/>
+        <result property="zoneId" column="zone_id"/>
+    </resultMap>
+
+    <sql id="selectBase">
+        SELECT c.*, b.name AS box_name, z.name AS zone_name, z.id AS zone_id
+        FROM customers c
+        LEFT JOIN boxes b ON c.box_id = b.id
+        LEFT JOIN zones z ON b.zone_id = z.id
+    </sql>
+
+    <select id="findById" resultMap="customerResultMap">
+        <include refid="selectBase"/>
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="customerResultMap">
+        <include refid="selectBase"/>
+        ORDER BY c.name
+    </select>
+
+    <select id="findByBoxId" resultMap="customerResultMap">
+        <include refid="selectBase"/>
+        WHERE c.box_id = #{boxId}
+        ORDER BY c.name
+    </select>
+
+    <select id="findAllPaged" resultMap="customerResultMap">
+        <include refid="selectBase"/>
+        <where>
+            <if test="search != null and search != ''">
+                AND (c.name LIKE CONCAT('%',#{search},'%')
+                  OR c.phone LIKE CONCAT('%',#{search},'%')
+                  OR c.meter_number LIKE CONCAT('%',#{search},'%'))
+            </if>
+            <if test="billingType != null and billingType != ''">
+                AND c.billing_type = #{billingType}
+            </if>
+            <if test="zoneId != null">
+                AND z.id = #{zoneId}
+            </if>
+        </where>
+        ORDER BY c.name
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM customers c
+        LEFT JOIN boxes b ON c.box_id = b.id
+        LEFT JOIN zones z ON b.zone_id = z.id
+        <where>
+            <if test="search != null and search != ''">
+                AND (c.name LIKE CONCAT('%',#{search},'%')
+                  OR c.phone LIKE CONCAT('%',#{search},'%')
+                  OR c.meter_number LIKE CONCAT('%',#{search},'%'))
+            </if>
+            <if test="billingType != null and billingType != ''">
+                AND c.billing_type = #{billingType}
+            </if>
+            <if test="zoneId != null">
+                AND z.id = #{zoneId}
+            </if>
+        </where>
+    </select>
+
+    <!-- Get active customers not already billed in this issuance -->
+    <select id="findByIssuanceForBilling" resultMap="customerResultMap">
+        <include refid="selectBase"/>
+        WHERE c.active = 1
+          AND c.id NOT IN (
+            SELECT customer_id FROM bills
+            WHERE issuance_id = #{issuanceId} AND is_trial = 0
+          )
+        ORDER BY z.name, b.name, c.name
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO customers (name, phone, address, box_id, billing_type, amper_capacity, meter_number, active)
+        VALUES (#{name}, #{phone}, #{address}, #{boxId}, #{billingType}, #{amperCapacity}, #{meterNumber}, #{active})
+    </insert>
+
+    <update id="update">
+        UPDATE customers SET
+            name = #{name},
+            phone = #{phone},
+            address = #{address},
+            box_id = #{boxId},
+            billing_type = #{billingType},
+            amper_capacity = #{amperCapacity},
+            meter_number = #{meterNumber},
+            active = #{active}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM customers WHERE id = #{id}
+    </delete>
+</mapper>
