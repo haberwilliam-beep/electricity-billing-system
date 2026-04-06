@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.electricity.mapper.IssuanceMapper">
+
+    <resultMap id="issuanceResultMap" type="Issuance">
+        <id property="id" column="id"/>
+        <result property="issuanceDate" column="issuance_date"/>
+        <result property="billingMonth" column="billing_month"/>
+        <result property="exchangeRate" column="exchange_rate"/>
+        <result property="status" column="status"/>
+        <result property="notes" column="notes"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdByUsername" column="created_by_username"/>
+    </resultMap>
+
+    <sql id="selectBase">
+        SELECT i.*, u.username AS created_by_username
+        FROM issuances i
+        LEFT JOIN users u ON i.created_by = u.id
+    </sql>
+
+    <select id="findById" resultMap="issuanceResultMap">
+        <include refid="selectBase"/>
+        WHERE i.id = #{id}
+    </select>
+
+    <select id="findByBillingMonth" resultMap="issuanceResultMap">
+        <include refid="selectBase"/>
+        WHERE DATE_FORMAT(i.billing_month, '%Y-%m') = #{billingMonth}
+    </select>
+
+    <select id="findAll" resultMap="issuanceResultMap">
+        <include refid="selectBase"/>
+        ORDER BY i.billing_month DESC
+    </select>
+
+    <select id="findAllPaged" resultMap="issuanceResultMap">
+        <include refid="selectBase"/>
+        ORDER BY i.billing_month DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM issuances
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO issuances (issuance_date, billing_month, exchange_rate, status, notes, created_by)
+        VALUES (#{issuanceDate}, #{billingMonth}, #{exchangeRate}, #{status}, #{notes}, #{createdBy})
+    </insert>
+
+    <update id="update">
+        UPDATE issuances SET
+            issuance_date = #{issuanceDate},
+            billing_month = #{billingMonth},
+            exchange_rate = #{exchangeRate},
+            status  = #{status},
+            notes   = #{notes}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE issuances SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM issuances WHERE id = #{id}
+    </delete>
+</mapper>

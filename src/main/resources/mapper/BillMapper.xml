@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.electricity.mapper.BillMapper">
+
+    <resultMap id="billResultMap" type="Bill">
+        <id property="id" column="id"/>
+        <result property="issuanceId" column="issuance_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="billingType" column="billing_type"/>
+        <result property="prevReading" column="prev_reading"/>
+        <result property="currReading" column="curr_reading"/>
+        <result property="consumption" column="consumption"/>
+        <result property="pricePerKwh" column="price_per_kwh"/>
+        <result property="amperCapacity" column="amper_capacity"/>
+        <result property="pricePerAmper" column="price_per_amper"/>
+        <result property="subFee" column="sub_fee"/>
+        <result property="totalUsd" column="total_usd"/>
+        <result property="totalLbp" column="total_lbp"/>
+        <result property="exchangeRate" column="exchange_rate"/>
+        <result property="isTrial" column="is_trial"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="customerName" column="customer_name"/>
+        <result property="boxName" column="box_name"/>
+        <result property="zoneName" column="zone_name"/>
+        <result property="billingMonthStr" column="billing_month_str"/>
+    </resultMap>
+
+    <sql id="selectBase">
+        SELECT b.*,
+               c.name AS customer_name,
+               bx.name AS box_name,
+               z.name AS zone_name,
+               DATE_FORMAT(i.billing_month,'%Y-%m') AS billing_month_str
+        FROM bills b
+        LEFT JOIN customers c ON b.customer_id = c.id
+        LEFT JOIN boxes bx ON c.box_id = bx.id
+        LEFT JOIN zones z ON bx.zone_id = z.id
+        LEFT JOIN issuances i ON b.issuance_id = i.id
+    </sql>
+
+    <select id="findById" resultMap="billResultMap">
+        <include refid="selectBase"/>
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="findByIssuanceId" resultMap="billResultMap">
+        <include refid="selectBase"/>
+        WHERE b.issuance_id = #{issuanceId}
+          AND b.is_trial = #{isTrial}
+        ORDER BY z.name, bx.name, c.name
+    </select>
+
+    <select id="findAllPaged" resultMap="billResultMap">
+        <include refid="selectBase"/>
+        <where>
+            <if test="issuanceId != null">
+                AND b.issuance_id = #{issuanceId}
+            </if>
+        </where>
+        ORDER BY b.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM bills b
+        <where>
+            <if test="issuanceId != null">
+                AND b.issuance_id = #{issuanceId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bills (issuance_id, customer_id, billing_type,
+            prev_reading, curr_reading, consumption, price_per_kwh,
+            amper_capacity, price_per_amper,
+            sub_fee, total_usd, total_lbp, exchange_rate, is_trial)
+        VALUES (#{issuanceId}, #{customerId}, #{billingType},
+            #{prevReading}, #{currReading}, #{consumption}, #{pricePerKwh},
+            #{amperCapacity}, #{pricePerAmper},
+            #{subFee}, #{totalUsd}, #{totalLbp}, #{exchangeRate}, #{isTrial})
+    </insert>
+
+    <insert id="insertBatch">
+        INSERT INTO bills (issuance_id, customer_id, billing_type,
+            prev_reading, curr_reading, consumption, price_per_kwh,
+            amper_capacity, price_per_amper,
+            sub_fee, total_usd, total_lbp, exchange_rate, is_trial)
+        VALUES
+        <foreach collection="bills" item="b" separator=",">
+            (#{b.issuanceId}, #{b.customerId}, #{b.billingType},
+             #{b.prevReading}, #{b.currReading}, #{b.consumption}, #{b.pricePerKwh},
+             #{b.amperCapacity}, #{b.pricePerAmper},
+             #{b.subFee}, #{b.totalUsd}, #{b.totalLbp}, #{b.exchangeRate}, #{b.isTrial})
+        </foreach>
+    </insert>
+
+    <delete id="deleteTrialByIssuance">
+        DELETE FROM bills WHERE issuance_id = #{issuanceId} AND is_trial = 1
+    </delete>
+
+    <delete id="deleteByIssuance">
+        DELETE FROM bills WHERE issuance_id = #{issuanceId}
+    </delete>
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.electricity.mapper.ZoneMapper">
+
+    <resultMap id="zoneResultMap" type="Zone">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="active" column="active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findById" resultMap="zoneResultMap">
+        SELECT * FROM zones WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="zoneResultMap">
+        SELECT * FROM zones ORDER BY name
+    </select>
+
+    <select id="findAllActive" resultMap="zoneResultMap">
+        SELECT * FROM zones WHERE active = 1 ORDER BY name
+    </select>
+
+    <select id="findAllPaged" resultMap="zoneResultMap">
+        SELECT * FROM zones
+        <where>
+            <if test="search != null and search != ''">
+                AND (name LIKE CONCAT('%',#{search},'%')
+                  OR description LIKE CONCAT('%',#{search},'%'))
+            </if>
+        </where>
+        ORDER BY name
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM zones
+        <where>
+            <if test="search != null and search != ''">
+                AND (name LIKE CONCAT('%',#{search},'%')
+                  OR description LIKE CONCAT('%',#{search},'%'))
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO zones (name, description, active)
+        VALUES (#{name}, #{description}, #{active})
+    </insert>
+
+    <update id="update">
+        UPDATE zones SET name=#{name}, description=#{description}, active=#{active}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM zones WHERE id = #{id}
+    </delete>
+</mapper>

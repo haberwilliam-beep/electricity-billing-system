@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.electricity.mapper.TranslationMapper">
+
+    <resultMap id="transResultMap" type="Translation">
+        <id property="id" column="id"/>
+        <result property="msgKey" column="msg_key"/>
+        <result property="enValue" column="en_value"/>
+        <result property="arValue" column="ar_value"/>
+        <result property="updatedBy" column="updated_by"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="updatedByUsername" column="updated_by_username"/>
+    </resultMap>
+
+    <sql id="selectBase">
+        SELECT t.*, u.username AS updated_by_username
+        FROM translations t
+        LEFT JOIN users u ON t.updated_by = u.id
+    </sql>
+
+    <select id="findByKey" resultMap="transResultMap">
+        <include refid="selectBase"/>
+        WHERE t.msg_key = #{msgKey}
+    </select>
+
+    <select id="findAll" resultMap="transResultMap">
+        <include refid="selectBase"/>
+        ORDER BY t.msg_key
+    </select>
+
+    <select id="findAllPaged" resultMap="transResultMap">
+        <include refid="selectBase"/>
+        <where>
+            <if test="search != null and search != ''">
+                AND (t.msg_key LIKE CONCAT('%',#{search},'%')
+                  OR t.en_value LIKE CONCAT('%',#{search},'%')
+                  OR t.ar_value LIKE CONCAT('%',#{search},'%'))
+            </if>
+        </where>
+        ORDER BY t.msg_key
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM translations t
+        <where>
+            <if test="search != null and search != ''">
+                AND (t.msg_key LIKE CONCAT('%',#{search},'%')
+                  OR t.en_value LIKE CONCAT('%',#{search},'%')
+                  OR t.ar_value LIKE CONCAT('%',#{search},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="findAllAsMap" resultType="map">
+        SELECT msg_key,
+        <choose>
+            <when test="lang == 'ar'">ar_value</when>
+            <otherwise>en_value</otherwise>
+        </choose>
+        AS value
+        FROM translations
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO translations (msg_key, en_value, ar_value, updated_by)
+        VALUES (#{msgKey}, #{enValue}, #{arValue}, #{updatedBy})
+    </insert>
+
+    <update id="update">
+        UPDATE translations SET
+            en_value   = #{enValue},
+            ar_value   = #{arValue},
+            updated_by = #{updatedBy}
+        WHERE msg_key = #{msgKey}
+    </update>
+
+    <insert id="upsert">
+        INSERT INTO translations (msg_key, en_value, ar_value, updated_by)
+        VALUES (#{msgKey}, #{enValue}, #{arValue}, #{updatedBy})
+        ON DUPLICATE KEY UPDATE
+            en_value   = VALUES(en_value),
+            ar_value   = VALUES(ar_value),
+            updated_by = VALUES(updated_by)
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM translations WHERE id = #{id}
+    </delete>
+</mapper>
