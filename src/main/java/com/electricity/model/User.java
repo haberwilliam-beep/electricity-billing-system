@@ -33,6 +33,8 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    /** Alias for {@link #getRole()} — satisfies code that calls getRoleName(). */
+    public String getRoleName() { return role; }
 
     public boolean isEnabled() { return enabled; }
     /** Alias for {@link #isEnabled()} — satisfies frameworks that call getEnabled() on boolean properties. */

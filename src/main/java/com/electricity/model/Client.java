@@ -25,6 +25,7 @@ public class Client {
     private Integer ampereCapacity;
     private String accountNumber;
     private boolean active;
+    private String zoneName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -55,7 +56,12 @@ public class Client {
     public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
 
     public boolean isActive() { return active; }
+    /** Alias for {@link #isActive()} — satisfies frameworks that call getActive() on boolean properties. */
+    public boolean getActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public String getZoneName() { return zoneName; }
+    public void setZoneName(String zoneName) { this.zoneName = zoneName; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

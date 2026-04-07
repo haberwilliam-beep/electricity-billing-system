@@ -13,8 +13,13 @@ public class Bill {
     private Long clientId;
     private String clientName;
     private Long meterReadingId;
+    private Long issuanceId;
     private Integer billingMonth;
     private Integer billingYear;
+    private boolean isTrial;
+    private String zoneName;
+    private BigDecimal prevReading;
+    private BigDecimal currReading;
     private BigDecimal consumption;
     private BigDecimal pricePerKwh;
     private BigDecimal pricePerAmpere;
@@ -47,11 +52,27 @@ public class Bill {
     public Long getMeterReadingId() { return meterReadingId; }
     public void setMeterReadingId(Long meterReadingId) { this.meterReadingId = meterReadingId; }
 
+    public Long getIssuanceId() { return issuanceId; }
+    public void setIssuanceId(Long issuanceId) { this.issuanceId = issuanceId; }
+
     public Integer getBillingMonth() { return billingMonth; }
     public void setBillingMonth(Integer billingMonth) { this.billingMonth = billingMonth; }
 
     public Integer getBillingYear() { return billingYear; }
     public void setBillingYear(Integer billingYear) { this.billingYear = billingYear; }
+
+    public boolean isIsTrial() { return isTrial; }
+    public boolean getIsTrial() { return isTrial; }
+    public void setIsTrial(boolean isTrial) { this.isTrial = isTrial; }
+
+    public String getZoneName() { return zoneName; }
+    public void setZoneName(String zoneName) { this.zoneName = zoneName; }
+
+    public BigDecimal getPrevReading() { return prevReading; }
+    public void setPrevReading(BigDecimal prevReading) { this.prevReading = prevReading; }
+
+    public BigDecimal getCurrReading() { return currReading; }
+    public void setCurrReading(BigDecimal currReading) { this.currReading = currReading; }
 
     public BigDecimal getConsumption() { return consumption; }
     public void setConsumption(BigDecimal consumption) { this.consumption = consumption; }
@@ -61,6 +82,10 @@ public class Bill {
 
     public BigDecimal getPricePerAmpere() { return pricePerAmpere; }
     public void setPricePerAmpere(BigDecimal pricePerAmpere) { this.pricePerAmpere = pricePerAmpere; }
+    /** Alias for {@link #getPricePerAmpere()} */
+    public BigDecimal getPricePerAmper() { return pricePerAmpere; }
+    /** Alias for {@link #setPricePerAmpere(BigDecimal)} */
+    public void setPricePerAmper(BigDecimal pricePerAmpere) { this.pricePerAmpere = pricePerAmpere; }
 
     public BigDecimal getSubscriptionFeePerAmpere() { return subscriptionFeePerAmpere; }
     public void setSubscriptionFeePerAmpere(BigDecimal subscriptionFeePerAmpere) { this.subscriptionFeePerAmpere = subscriptionFeePerAmpere; }
@@ -73,12 +98,24 @@ public class Bill {
 
     public BigDecimal getSubscriptionFeeUsd() { return subscriptionFeeUsd; }
     public void setSubscriptionFeeUsd(BigDecimal subscriptionFeeUsd) { this.subscriptionFeeUsd = subscriptionFeeUsd; }
+    /** Alias for {@link #getSubscriptionFeeUsd()} */
+    public BigDecimal getSubFee() { return subscriptionFeeUsd; }
+    /** Alias for {@link #setSubscriptionFeeUsd(BigDecimal)} */
+    public void setSubFee(BigDecimal subscriptionFeeUsd) { this.subscriptionFeeUsd = subscriptionFeeUsd; }
 
     public BigDecimal getTotalAmountUsd() { return totalAmountUsd; }
     public void setTotalAmountUsd(BigDecimal totalAmountUsd) { this.totalAmountUsd = totalAmountUsd; }
+    /** Alias for {@link #getTotalAmountUsd()} */
+    public BigDecimal getTotalUsd() { return totalAmountUsd; }
+    /** Alias for {@link #setTotalAmountUsd(BigDecimal)} */
+    public void setTotalUsd(BigDecimal totalAmountUsd) { this.totalAmountUsd = totalAmountUsd; }
 
     public BigDecimal getTotalAmountLbp() { return totalAmountLbp; }
     public void setTotalAmountLbp(BigDecimal totalAmountLbp) { this.totalAmountLbp = totalAmountLbp; }
+    /** Alias for {@link #getTotalAmountLbp()} */
+    public BigDecimal getTotalLbp() { return totalAmountLbp; }
+    /** Alias for {@link #setTotalAmountLbp(BigDecimal)} */
+    public void setTotalLbp(BigDecimal totalAmountLbp) { this.totalAmountLbp = totalAmountLbp; }
 
     public BigDecimal getExchangeRate() { return exchangeRate; }
     public void setExchangeRate(BigDecimal exchangeRate) { this.exchangeRate = exchangeRate; }
