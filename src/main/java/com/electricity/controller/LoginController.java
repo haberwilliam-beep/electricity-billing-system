@@ -1,18 +1,7 @@
 package com.electricity.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-
-@Controller
+/**
+ * @deprecated Replaced by {@link AuthController} and {@link DashboardController}.
+ */
 public class LoginController {
-
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "dashboard";
-    }
 }
