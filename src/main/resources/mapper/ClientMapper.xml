@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.electricity.dao.ClientDao">
+
+    <resultMap id="ClientResultMap" type="Client">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="clientType" column="client_type"/>
+        <result property="ampereCapacity" column="ampere_capacity"/>
+        <result property="accountNumber" column="account_number"/>
+        <result property="active" column="active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="ClientResultMap">
+        SELECT * FROM clients WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="ClientResultMap">
+        SELECT * FROM clients ORDER BY name
+    </select>
+
+    <select id="findByType" resultMap="ClientResultMap">
+        SELECT * FROM clients WHERE client_type = #{clientType} ORDER BY name
+    </select>
+
+    <select id="findActive" resultMap="ClientResultMap">
+        SELECT * FROM clients WHERE active = 1 ORDER BY name
+    </select>
+
+    <insert id="insert" parameterType="Client" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO clients (name, address, phone, email, client_type, ampere_capacity, account_number, active, created_at, updated_at)
+        VALUES (#{name}, #{address}, #{phone}, #{email}, #{clientType}, #{ampereCapacity}, #{accountNumber}, #{active}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="Client">
+        UPDATE clients SET
+            name = #{name},
+            address = #{address},
+            phone = #{phone},
+            email = #{email},
+            client_type = #{clientType},
+            ampere_capacity = #{ampereCapacity},
+            account_number = #{accountNumber},
+            active = #{active},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM clients WHERE id = #{id}
+    </delete>
+
+    <select id="countByAccountNumber" resultType="int">
+        SELECT COUNT(*) FROM clients WHERE account_number = #{accountNumber}
+    </select>
+
+</mapper>

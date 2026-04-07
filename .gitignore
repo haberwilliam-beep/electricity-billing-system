@@ -23,21 +23,20 @@
 hs_err_pid*
 replay_pid*
 
-# Maven
+# Maven build output
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
 # IDE files
 .idea/
 *.iml
-.classpath
+*.iws
+*.ipr
+.eclipse/
 .project
+.classpath
 .settings/
-*.swp
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
 

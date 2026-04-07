@@ -1,128 +1,182 @@
-# Electricity Generator Billing System
+# ⚡ Electricity Billing Management System
 
-A comprehensive web-based billing management system for electricity generator services. Built with **Spring Boot**, **JSP/JSTL**, **jqGrid**, **MyBatis**, and **MySQL**.
+A complete Spring Boot application for managing electricity billing with support for meter-based and amper-based clients, dual-currency invoicing (USD & LBP), and a web-based management interface.
 
-## Features
+---
 
-- ✅ **Authentication & Authorization** — Login/logout with role-based access (Admin, Operator, Viewer)
-- ✅ **Customer Management** — Create/edit customers with meter or amper billing types
-- ✅ **Zone & Box Management** — Hierarchical zone → box → customer structure
-- ✅ **Parameter Configuration** — Configurable price per kWh, per amper, subscription fees, exchange rates
-- ✅ **Issuance Management** — Monthly billing issuances with exchange rate tracking
-- ✅ **Trial & Final Billing** — Preview billing before committing to final records
-- ✅ **PDF Invoice Generation** — Separate layouts for meter-based and amper-based clients
-- ✅ **Multi-Language Support** — English and Arabic with dynamic translation management
-- ✅ **Audit Logging** — Track all user actions and billing operations
-- ✅ **jqGrid Tables** — Readonly and inline-editable grids for all entities
+## 🚀 Features
 
-## Technology Stack
+### Client Management
+- **Meter-Based Clients** – Billed on actual kWh consumption (end reading − start reading)
+- **Amper-Based Clients** – Billed on subscribed Ampere capacity (5A or 10A)
+- Full CRUD with editable jqGrid
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | Spring Boot 2.7.x, Spring MVC, Spring Security |
-| Frontend | JSP + JSTL, Bootstrap 4, Font Awesome |
-| Grid Component | jqGrid (free-jqgrid 4.15.5) |
-| JavaScript | jQuery 3.6, Bootstrap JS |
-| Data Access | MyBatis 3 with XML mappers |
-| Database | MySQL 8.0 |
-| PDF Generation | iText PDF 5.5.x |
-| Build Tool | Maven 3.x |
+### Billing Engine
+- Automatic calculation of consumption charges, ampere charges, and subscription fees
+- Dual-currency invoices: **USD** and **Lebanese Lira (LBP)**
+- Formula:
+  - *Meter-based:* `(kWh × price/kWh) + (subscriptionFee/A × capacity)`
+  - *Amper-based:* `(price/A × capacity) + (subscriptionFee/A × capacity)`
 
-## Prerequisites
+### Invoice Management
+- Invoice generation from bills
+- Read-only invoice grid with export to CSV
+- Mark invoices as Paid / Overdue / Cancelled
 
-- **Java 11** or later
-- **Maven 3.6+**
-- **MySQL 8.0+**
+### Parameter Configuration
+- Admin screen for:
+  - Price per kWh
+  - Price per Ampere
+  - Monthly Subscription Fee per Ampere
+  - USD → LBP Exchange Rate
 
-## Setup Instructions
+### Security
+- Spring Security login/logout with BCrypt password hashing
+- Role-based access control (ADMIN / USER)
+- CSRF protection
 
-### 1. Database Setup
+---
 
-Create the database and run the schema:
+## 🛠️ Tech Stack
 
-```bash
-mysql -u root -p < src/main/resources/schema.sql
+| Layer        | Technology                              |
+|-------------|------------------------------------------|
+| Backend     | Spring Boot 2.7.x, Spring MVC            |
+| ORM         | MyBatis 2.3.x                            |
+| Database    | MySQL 8.0                                |
+| Frontend    | JSP, JSTL, Bootstrap 4                   |
+| Grids       | jqGrid (free-jqgrid 4.15)                |
+| JS/CSS      | jQuery 3.6, Bootstrap 4.6                |
+| Security    | Spring Security 5.x                      |
+| Build       | Maven (WAR packaging)                    |
+
+---
+
+## 📁 Project Structure
+
+```
+src/main/java/com/electricity/
+├── config/
+│   ├── SecurityConfig.java       # Spring Security configuration
+│   └── WebConfig.java            # MVC resource handlers
+├── controller/
+│   ├── AuthController.java
+│   ├── DashboardController.java
+│   ├── ClientController.java
+│   ├── MeterReadingController.java
+│   ├── BillingController.java
+│   ├── InvoiceController.java
+│   └── ParameterController.java
+├── dao/                          # MyBatis mapper interfaces
+├── model/                        # Domain models
+│   ├── User, Client, MeterReading, Bill, Invoice, Parameter
+├── service/                      # Business logic
+└── util/
+    ├── BillingCalculator.java    # Billing formula calculations
+    └── CurrencyConverter.java    # USD ↔ LBP conversion
+
+src/main/resources/
+├── application.properties
+├── database/
+│   ├── schema.sql                # MySQL DDL
+│   └── sample-data.sql           # Initial data & demo clients
+└── mapper/                       # MyBatis XML mappers
+
+src/main/webapp/WEB-INF/jsp/      # JSP pages with jqGrid
+src/main/webapp/css/              # Bootstrap + custom styles
+src/main/webapp/js/               # jQuery utilities
 ```
 
-This creates:
-- The `electricity_billing` database
-- All required tables (users, roles, zones, boxes, customers, parameters, issuances, bills, translations, audit_logs)
-- Default data (admin user, roles, parameters, translations)
+---
 
-**Default admin credentials:**
-- Username: `admin`
-- Password: `admin123`
+## ⚙️ Setup & Installation
 
-### 2. Configure Application
+### Prerequisites
+- Java 11+
+- Maven 3.6+
+- MySQL 8.0
 
+### 1. Create the Database
+```sql
+-- Run schema
+mysql -u root -p < src/main/resources/database/schema.sql
+
+-- Load sample data (optional)
+mysql -u root -p electricity_billing < src/main/resources/database/sample-data.sql
+```
+
+### 2. Configure Database Connection
 Edit `src/main/resources/application.properties`:
-
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/electricity_billing?useSSL=false&serverTimezone=UTC
-spring.datasource.username=your_db_username
+spring.datasource.username=your_db_user
 spring.datasource.password=your_db_password
 ```
 
-### 3. Build and Run
-
+### 3. Build & Run
 ```bash
-# Build the project
+# Build WAR
 mvn clean package -DskipTests
 
 # Run with embedded Tomcat
 mvn spring-boot:run
 ```
 
-The application will be available at: `http://localhost:8080/ebilling`
+The application starts at: **http://localhost:8080**
 
-### 4. Deploy to External Tomcat (Optional)
+### 4. Default Login Credentials
+| Username | Password  | Role  |
+|----------|-----------|-------|
+| admin    | admin123  | ADMIN |
+| user1    | admin123  | USER  |
+
+---
+
+## 📊 Application Modules
+
+| URL                | Description                              |
+|--------------------|------------------------------------------|
+| `/login`           | Login page                               |
+| `/dashboard`       | Dashboard with key metrics               |
+| `/clients`         | Client management (CRUD with jqGrid)     |
+| `/meter-readings`  | Meter readings (editable jqGrid)         |
+| `/billing`         | Bill generation for all client types     |
+| `/invoices`        | Invoice management (read-only jqGrid)    |
+| `/parameters`      | System parameter configuration           |
+
+---
+
+## 🧮 Billing Logic
+
+```
+// Meter-Based Client
+consumptionCharge = (endReading - startReading) × pricePerKwh
+subscriptionFee   = subscriptionFeePerAmpere × ampereCapacity
+totalUSD          = consumptionCharge + subscriptionFee
+totalLBP          = totalUSD × exchangeRate
+
+// Amper-Based Client
+ampereCharge    = pricePerAmpere × ampereCapacity
+subscriptionFee = subscriptionFeePerAmpere × ampereCapacity
+totalUSD        = ampereCharge + subscriptionFee
+totalLBP        = totalUSD × exchangeRate
+```
+
+---
+
+## 🧪 Tests
 
 ```bash
-mvn clean package -DskipTests
-# Copy target/electricity-billing-system-1.0.0.war to Tomcat's webapps directory
+mvn test
 ```
 
-## Project Structure
+Unit tests cover:
+- `BillingCalculator` – all billing formula methods
+- `CurrencyConverter` – USD ↔ LBP conversion
+- Null input handling
 
-```
-src/
-├── main/
-│   ├── java/com/electricity/
-│   │   ├── ElectricityBillingApplication.java
-│   │   ├── config/           # Security, Web MVC, UserDetailsService
-│   │   ├── controller/       # REST + MVC controllers for all features
-│   │   ├── model/            # Domain entities (User, Customer, Zone, Box, etc.)
-│   │   ├── mapper/           # MyBatis mapper interfaces
-│   │   ├── service/          # Service interfaces and implementations
-│   │   ├── dto/              # GridResponse, ApiResponse, BillingResult
-│   │   └── util/             # PdfGenerator, MeterReadingPair
-│   ├── resources/
-│   │   ├── application.properties
-│   │   ├── schema.sql
-│   │   └── mapper/           # MyBatis XML mapper files
-│   └── webapp/
-│       ├── WEB-INF/jsp/      # JSP pages for all screens
-│       └── static/           # CSS and JavaScript files
-```
+---
 
-## Default User Roles
+## 📝 License
 
-| Role | Access |
-|------|--------|
-| ROLE_ADMIN | Full access including user management |
-| ROLE_OPERATOR | Customers, billing, issuances, parameters |
-| ROLE_VIEWER | Read-only access to all views |
-
-## Billing Workflow
-
-1. **Create Parameters** — Set price per kWh, per amper, subscription fee, exchange rate
-2. **Create Zones & Boxes** — Define geographic/organizational structure
-3. **Add Customers** — Assign to boxes, choose billing type (Meter or Amper)
-4. **Create Issuance** — Select billing month and exchange rate
-5. **Trial Billing** — Preview calculations without saving
-6. **Final Billing** — Commit billing to database
-7. **Generate PDF** — Print invoices for customers
-
-## License
-
-Apache License 2.0 — see [LICENSE](LICENSE) for details.
+Apache License 2.0
