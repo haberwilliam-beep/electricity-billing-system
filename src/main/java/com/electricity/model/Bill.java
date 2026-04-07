@@ -36,9 +36,13 @@ public class Bill {
 
     public Long getClientId() { return clientId; }
     public void setClientId(Long clientId) { this.clientId = clientId; }
+    /** Alias for {@link #getClientId()} */
+    public Long getCustomerId() { return clientId; }
 
     public String getClientName() { return clientName; }
     public void setClientName(String clientName) { this.clientName = clientName; }
+    /** Alias for {@link #getClientName()} */
+    public String getCustomerName() { return clientName; }
 
     public Long getMeterReadingId() { return meterReadingId; }
     public void setMeterReadingId(Long meterReadingId) { this.meterReadingId = meterReadingId; }

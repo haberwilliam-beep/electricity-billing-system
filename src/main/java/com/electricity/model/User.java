@@ -35,6 +35,8 @@ public class User {
     public void setRole(String role) { this.role = role; }
 
     public boolean isEnabled() { return enabled; }
+    /** Alias for {@link #isEnabled()} — satisfies frameworks that call getEnabled() on boolean properties. */
+    public boolean getEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
