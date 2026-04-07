@@ -2,14 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.electricity.dao.ParameterDao">
+<mapper namespace="com.electricity.mapper.ParameterMapper">
 
     <resultMap id="ParameterResultMap" type="Parameter">
         <id property="id" column="id"/>
         <result property="paramKey" column="param_key"/>
         <result property="paramValue" column="param_value"/>
         <result property="description" column="description"/>
-        <result property="createdAt" column="created_at"/>
+        <result property="updatedBy" column="updated_by"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
@@ -26,8 +26,8 @@
     </select>
 
     <insert id="insert" parameterType="Parameter" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO parameters (param_key, param_value, description, created_at, updated_at)
-        VALUES (#{paramKey}, #{paramValue}, #{description}, NOW(), NOW())
+        INSERT INTO parameters (param_key, param_value, description, updated_at)
+        VALUES (#{paramKey}, #{paramValue}, #{description}, NOW())
     </insert>
 
     <update id="update" parameterType="Parameter">
@@ -40,8 +40,8 @@
     </update>
 
     <insert id="upsert" parameterType="Parameter">
-        INSERT INTO parameters (param_key, param_value, description, created_at, updated_at)
-        VALUES (#{paramKey}, #{paramValue}, #{description}, NOW(), NOW())
+        INSERT INTO parameters (param_key, param_value, description, updated_at)
+        VALUES (#{paramKey}, #{paramValue}, #{description}, NOW())
         ON DUPLICATE KEY UPDATE
             param_value = #{paramValue},
             description = #{description},
